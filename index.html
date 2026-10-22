@@ -35,10 +35,12 @@
 <script>
 'use strict';
 const data=JSON.parse(document.getElementById('report-data').textContent);
-const rows=[...data.actions,...data.matched];
+const storeNumber=value=>{const match=String(value??'').match(/^\s*(\d+)\s*[-–]/);return match?Number(match[1]):Infinity};
+const compareStores=(a,b)=>{const x=storeNumber(a),y=storeNumber(b);return x===y?0:x<y?-1:1};
+const rows=[...data.actions,...data.matched].sort((a,b)=>compareStores(a[2],b[2])||String(a[1]).localeCompare(String(b[1]),undefined,{numeric:true}));
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const label=s=>s==='Matched'?'Already covered':s==='Review'?'Review':'Create Work Order';
-const locations=[...new Set(rows.map(r=>r[2]))].sort();
+const locations=[...new Set(rows.map(r=>r[2]))].sort((a,b)=>compareStores(a,b)||a.localeCompare(b));
 locations.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;$('store').append(o)});
 function filtered(){const q=$('search').value.toLowerCase().trim(),s=$('status').value;return rows.filter(r=>(!$('store').value||r[2]===$('store').value)&&(!q||[r[1],r[2],r[3],r[5],r[8],r[10],r[11],r[12],r[13],r[19]].join(' ').toLowerCase().includes(q))&&(s==='All issues'||s==='Action items'?(s==='All issues'||$('covered').checked||r[0]!=='Matched'):r[0]===s));}
 function field(k,v){return '<dt>'+esc(k)+'</dt><dd>'+esc(v||'Not supplied')+'</dd>'}
