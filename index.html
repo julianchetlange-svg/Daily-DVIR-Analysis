@@ -11,7 +11,7 @@
 <p id="fexa-note" style="margin-bottom:18px;font-size:13px">Fexa download: Create Work Order items in the current filters only, combined into one work order per asset and trade. Different trades remain separate. Asset linking is pending Fexa confirmation; asset numbers are included in descriptions. Review for work orders created since this report before uploading.</p>
 <section class="stats" aria-label="Issue counts">
 <button class="stat active" data-filter="Action items"><span>ACTION ITEMS</span><strong>32</strong><small>From 29 assets with reported defects</small></button>
-<button class="stat" data-filter="Create Work Order"><span>CREATE WORK ORDER</span><strong>20</strong><small>No confirmed active coverage</small></button>
+<button class="stat" data-filter="Create Work Order"><span>CREATE WORK ORDER</span><strong id="create-wo-count">18</strong><small id="create-wo-summary">20 issues combined into 18 work orders</small></button>
 <button class="stat yellow" data-filter="Review"><span>NEEDS REVIEW</span><strong>12</strong><small>Check details before proceeding</small></button>
 <button class="stat green" data-filter="Matched"><span>ALREADY COVERED</span><strong>5</strong><small>Active WO match ≥90%</small></button>
 </section>
@@ -104,6 +104,15 @@ $('fexa-export').addEventListener('click',()=>{
  const a=document.createElement('a');a.href=url;a.download='Fexa_DVIR_'+data.dvir_date+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 
+function updateCreateWorkOrderCard(){
+ const issues=rows.filter(r=>r[0]==='Create Work Order').length;
+ const result=buildFexaExport(rows),count=result.output.length;
+ $('create-wo-count').textContent=result.errors.length?'—':String(count);
+ $('create-wo-summary').textContent=result.errors.length
+  ?issues+' issues · resolve mappings to calculate work orders'
+  :issues+' issue'+(issues===1?'':'s')+' combined into '+count+' work order'+(count===1?'':'s');
+}
+updateCreateWorkOrderCard();
 render();
 </script></body></html>
 
